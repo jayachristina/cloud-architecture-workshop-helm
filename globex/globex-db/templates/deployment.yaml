@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "globex-db.name" . }}
+  labels:
+    {{- include "globex-db.labels" . | nindent 4 }}
+    app.openshift.io/runtime: postgresql
+  annotations:
+    {{- include "globex-db.argocd-syncwave" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "globex-db.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "globex-db.selectorLabels" . | nindent 8 }}
+    spec:
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      serviceAccountName: {{ include "globex-db.serviceAccountName" . }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: postgresql
+              containerPort: {{ .Values.service.containerPort }}
+              protocol: TCP
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: POSTGRESQL_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: postgresql-admin-password
+                  name: {{ include "globex-db.name" . }}
+            - name: POSTGRESQL_MAX_CONNECTIONS
+              value: "{{ .Values.postgresql.maxConnections }}"
+            - name: POSTGRESQL_MAX_PREPARED_TRANSACTIONS
+              value: "{{ .Values.postgresql.maxPreparedTransactions }}"
+          volumeMounts:
+            - name: "{{ include "globex-db.name" . }}-config"
+              mountPath: "/opt/app-root/src/postgresql-cfg"
+            {{- if eq .Values.persistence.mode "persistent" }}
+            - name: "{{ include "globex-db.name" . }}-data"
+              mountPath: "/var/lib/pgsql/data"
+              volumes:
+            {{- end }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+      volumes: 
+        - name: "{{ include "globex-db.name" . }}-config"
+          configMap:
+            name: "{{ include "globex-db.name" . }}-config"
+        {{- if eq .Values.persistence.mode "persistent" }}
+        - name: "{{ include "globex-db.name" . }}-data"
+          persistentVolumeClaim:
+            claimName: {{ include "globex-db.name" . }}
+        {{- end }}
