@@ -1,0 +1,48 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "order-db.name" . }}-init
+  labels:
+    {{- include "order-db.labels" . | nindent 4 }}
+  annotations:
+    {{- include "order-db.argocd-syncwave" . | nindent 4 }}
+spec:
+  selector: {}
+  template:
+    metadata:
+      name: {{ include "order-db.name" . }}-init
+    spec:
+      serviceAccountName: {{ include "order-db.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ include "order-db.name" . }}-init
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: POSTGRESQL_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: postgresql-admin-password
+                  name: {{ .Values.globexDb.secret }}
+            - name: POSTGRESQL_REMOTE_HOST
+              value: {{ .Values.globexDb.host }}
+            - name: POSTGRESQL_USER
+              valueFrom:
+                secretKeyRef:
+                  key: database-user
+                  name: {{ include "order-db.name" . }}
+            - name: POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: database-password
+                  name: {{ include "order-db.name" . }}
+            - name: POSTGRESQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  key: database-name
+                  name: {{ include "order-db.name" . }}
+          command: ["/usr/bin/bash", "-c", "source /opt/app-root/src/postgresql-create/create-postgresql.sh"]
+      restartPolicy: Never
