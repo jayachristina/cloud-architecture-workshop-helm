@@ -21,7 +21,7 @@ dependencies:
   - name: order-aggregator
     version: 0.1.0
     repository: file://order-aggregator
-  # - name: cashback-connector
-  #   version: 0.1.0
-  #   repository: file://cashback-connector
-  #   condition: cashbackConnector.deploy
+  - name: cashback-connector
+    version: 0.1.0
+    repository: file://cashback-connector
+    condition: cashbackConnector.deploy
