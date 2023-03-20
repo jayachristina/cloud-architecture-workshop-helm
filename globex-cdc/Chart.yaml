@@ -18,9 +18,9 @@ dependencies:
   # - name: cashback-service
   #   version: 0.1.0
   #   repository: file://cashback-service
-  # - name: order-aggregator
-  #   version: 0.1.0
-  #   repository: file://order-aggregator
+  - name: order-aggregator
+    version: 0.1.0
+    repository: file://order-aggregator
   # - name: cashback-connector
   #   version: 0.1.0
   #   repository: file://cashback-connector
