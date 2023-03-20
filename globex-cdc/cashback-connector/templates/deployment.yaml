@@ -77,7 +77,7 @@ spec:
             - name: KAFKA_SASL_JAAS_CONFIG
               valueFrom:
                 secretKeyRef:
-                  key: saslJassConfig
+                  key: saslJaasConfig
                   name: {{ .Values.kafka.secret }}
       volumes:
         - name: config
