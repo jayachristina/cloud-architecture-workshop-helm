@@ -74,10 +74,12 @@ Kafka Client Secret Name
 Kafka Client Secret Absent?
 */}}
 {{- define "kafka.client-connection-secret.absent" }}
-{{- $secretObj := (lookup "v1" "Secret" .Release.Namespace (include "kafka.client-connection-secret.name" . )) | default dict }}
 {{- $output := "" }}
+{{- if not .Values.kafka.bootstrapServer }}
+{{- $secretObj := (lookup "v1" "Secret" .Release.Namespace (include "kafka.client-connection-secret.name" . )) | default dict }}
 {{- if not $secretObj }}
 {{- $output = "1" }}
+{{- end }}
 {{- end }}
 {{- $output }}
 {{- end }}
@@ -86,13 +88,11 @@ Kafka Client Secret Absent?
 Kafka Client Secret Namespace
 */}}
 {{- define "kafka.client-connection-secret.namespace" }}
-{{- $output := "" }}
-{{- if (include "kafka.client-connection-secret.absent" .) }}
-{{- $output = .Values.kafka.namespace }}
+{{- if ( include "kafka.client-connection-secret.absent" . ) }}
+{{- .Values.kafka.namespace }}
 {{- else }}
-{{- $output = .Release.Namespace }}
+{{- .Release.Namespace }}
 {{- end }}
-{{- $output }}
 {{- end }}
 
 {{/*
@@ -116,7 +116,7 @@ Kafka Client Authentication
 */}}
 {{- define "kafka.authentication" }}
 {{- $output := "" }}
-{{- if .Values.kafka.userId }}
+{{- if .Values.kafka.clientId }}
 {{- $output = "1" }}
 {{- else }}
 {{- $secretObj := (lookup "v1" "Secret" (include "kafka.client-connection-secret.namespace" .) (include "kafka.client-connection-secret.name" . )) | default dict }}
@@ -125,22 +125,6 @@ Kafka Client Authentication
 {{- if $clientId }}
 {{- $output = "1" }}
 {{- end }}
-{{- end }}
-{{- $output }}
-{{- end }}
-
-{{/*
-Kafka Security Protocol
-*/}}
-{{- define "kafka.security-protocol" }}
-{{- $output := "" }}
-{{- if .Values.kafka.securityProtocol }}
-{{- $output = .Values.kafka.securityProtocol }}
-{{- else }}
-{{- $secretObj := (lookup "v1" "Secret" (include "kafka.client-connection-secret.namespace" .) (include "kafka.client-connection-secret.name" . )) | default dict }}
-{{- $secretData := (get $secretObj "data") | default dict }}
-{{- $securityProtocol := (get $secretData "securityProtocol") | b64dec }}
-{{- $output = $securityProtocol }}
 {{- end }}
 {{- $output }}
 {{- end }}
@@ -157,6 +141,22 @@ Kafka Sasl Mechanism
 {{- $secretData := (get $secretObj "data") | default dict }}
 {{- $saslMechanism := (get $secretData "saslMechanism") | b64dec }}
 {{- $output = $saslMechanism }}
+{{- end }}
+{{- $output }}
+{{- end }}
+
+{{/*
+Kafka Security Protocol
+*/}}
+{{- define "kafka.security-protocol" }}
+{{- $output := "" }}
+{{- if .Values.kafka.securityProtocol }}
+{{- $output = .Values.kafka.securityProtocol }}
+{{- else }}
+{{- $secretObj := (lookup "v1" "Secret" (include "kafka.client-connection-secret.namespace" .) (include "kafka.client-connection-secret.name" . )) | default dict }}
+{{- $secretData := (get $secretObj "data") | default dict }}
+{{- $securityProtocol := (get $secretData "securityProtocol") | b64dec }}
+{{- $output = $securityProtocol }}
 {{- end }}
 {{- $output }}
 {{- end }}
