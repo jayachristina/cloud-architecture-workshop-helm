@@ -5,9 +5,9 @@ type: application
 version: 0.1.0
 
 dependencies:
-  # - name: kafka-connect
-  #   version: 0.1.0
-  #   repository: file://kafka-connect
+  - name: kafka-connect
+    version: 0.1.0
+    repository: file://kafka-connect
   # - name: debezium
   #   version: 0.1.0
   #   repository: file://debezium
