@@ -36,3 +36,6 @@ dependencies:
   - name: mobile-account-application
     version: 0.1.0
     repository: file://mobile-account-application
+  - name: mobile-gateway-activedoc
+    version: 0.1.0
+    repository: file://mobile-gateway-activedoc

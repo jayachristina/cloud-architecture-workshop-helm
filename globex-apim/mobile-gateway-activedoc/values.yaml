@@ -1,0 +1,13 @@
+argocd:
+  enabled: true
+  syncwave: "2"
+
+activedoc:
+  name: "Globex Mobile Gateway ActiveDoc"
+  systemName: globex-mobile-gateway-activedoc
+  issuerEndpoint: ""
+
+
+product:
+  systemName: globex-mobile-gateway-product
+  

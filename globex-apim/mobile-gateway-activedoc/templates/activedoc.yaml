@@ -1,0 +1,17 @@
+apiVersion: capabilities.3scale.net/v1beta1
+kind: ActiveDoc
+metadata:
+  name: {{ include "mobile-gateway-activedoc.name" . }}
+  annotations:
+    {{- include "mobile-gateway-activedoc.argocd-syncwave" . | nindent 4 }}
+spec:
+  activeDocOpenAPIRef:
+    secretRef:
+      name: mobile-openapi
+      namespace: globex-apim-user1
+    name: Mobile ActiveDoc
+  providerAccountRef:
+    name: 3scale-tenant-secret
+  productSystemName: {{ .Values.product.systemName }}
+  published: true
+  name: {{ .Values.activedoc.name }}
